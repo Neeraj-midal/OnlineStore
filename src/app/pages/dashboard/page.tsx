@@ -274,7 +274,7 @@ export default function Dashboard() {
 
         {/* Footer */}
         <footer className="bg-white shadow-inner p-4 text-center">
-          <p className="text-gray-600">Dashboard Footer &copy; 2025</p>
+          <p className="text-gray-600">Dashboard Footer ONINE STORE &copy; 2025</p>
         </footer>
       </div>
     </div>
