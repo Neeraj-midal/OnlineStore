@@ -1,0 +1,156 @@
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+
+
+// Admin Model
+model admin {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  adminId          String
+  email            String    @unique
+  password         String
+  status           String
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+// User Model
+model user {
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  email            String    @unique
+  phoneNumber      String
+  password         String
+  gender           String
+  profilePicture   String?
+  isEmailVerified  Boolean   @default(false)
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  role             Role      @default(USER)
+  storeDetails  storeDetails[]
+  
+}
+
+model storeDetails {
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String     @db.ObjectId
+  name             String
+  email            String @unique
+  phoneNumber      String
+  location         String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  user             user   @relation(fields: [userId], references: [id])
+  MainCategory mainCategory[] @relation("StoreMainCategories")
+}
+
+// Main Category Model
+model mainCategory {
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  status           String
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  storeId          String              @db.ObjectId
+  StoreDetails storeDetails @relation(fields: [storeId], references: [id], name: "StoreMainCategories")
+  subChildCategory subChildCategory[]
+}
+
+
+// Sub Child Category Model
+model subChildCategory {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  status           String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  mainCategoryId   String         @db.ObjectId
+  mainCategory     mainCategory   @relation(fields: [mainCategoryId], references: [id])
+}
+
+// Product Model
+model product {
+  id                 String          @id @default(auto()) @map("_id") @db.ObjectId
+  title              String
+  imageUrl           String
+  price              Float
+  realCost           Float
+  sellingPrice       Float
+  discount           Float
+  status             String
+  mainCategoryId     String          @db.ObjectId
+  subChildCategoryId String          @db.ObjectId
+  addedBy            String
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  images             productImage[]  @relation("ProductImages")
+  details            productDetail[] @relation("ProductDetails")
+}
+ 
+// Product Images Model
+model productImage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  pId       String   @db.ObjectId
+  imagePath String
+  createdAt DateTime @default(now())
+  createdBy String
+  updatedAt DateTime @updatedAt
+  updatedBy String
+  Product   product  @relation(fields: [pId], references: [id], name: "ProductImages")
+}
+
+// Product Details Model
+model productDetail {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  pId       String   @db.ObjectId
+  key       String
+  value     String
+  addedAt   DateTime @default(now())
+  createdBy String
+  updatedAt DateTime @updatedAt
+  updatedBy String
+  Product   product  @relation(fields: [pId], references: [id], name: "ProductDetails")
+}
+
+// Cart Model
+model cart {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  pId       String   @db.ObjectId
+  pieces    Int
+  addedBy   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Order Model
+model order {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId       String   @unique
+  userId        String   @db.ObjectId
+  paymentAmount Float
+  paymentId     String
+  paymentMethod String
+  orderStatus   String
+  orderDate     DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
